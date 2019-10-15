@@ -13114,11 +13114,7 @@ div#notebook {
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="US-Airport-Passport-Control-Wait-Times">US Airport Passport Control Wait Times<a class="anchor-link" href="#US-Airport-Passport-Control-Wait-Times">&#182;</a></h1><p>I made this to help determine a good time to fly in and out of US airports.</p>
-<ul>
-<li><a href="https://awt.cbp.gov">Data Source</a></li>
-<li><a href="https://awt.cbp.gov/Specs.html">Specs</a></li>
-</ul>
+<h1 id="US-Airport-Passport-Control-Wait-Times">US Airport Passport Control Wait Times<a class="anchor-link" href="#US-Airport-Passport-Control-Wait-Times">&#182;</a></h1><p><a href="https://github.com/abhinavsharma/airport-wait-times">https://github.com/abhinavsharma/airport-wait-times</a></p>
 
 </div>
 </div>
@@ -13226,191 +13222,13 @@ div#notebook {
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># sample data and to get shape of arrays</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># sample data</span>
 <span class="p">(</span><span class="n">fromDate</span><span class="p">,</span> <span class="n">toDate</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_last_months_from_to_dates</span><span class="p">()</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">get_airport_info</span><span class="p">(</span><span class="s1">&#39;SFO&#39;</span><span class="p">,</span> <span class="n">fromDate</span><span class="p">,</span> <span class="n">toDate</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
     </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    
-
-
-<div class="output_html rendered_html output_subarea output_execute_result">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>U.S. Citizen Average Wait  Time</th>
-      <th>U.S. Citizen Max Wait  Time</th>
-      <th>Non U.S. Citizen Average Wait  Time</th>
-      <th>Non U.S. Citizen Max Wait  Time</th>
-      <th>All Wait Times Average Wait  Time</th>
-      <th>All Wait Times Max Wait  Time</th>
-      <th>All Number Of Passengers Time Interval 0-15</th>
-      <th>All Number Of Passengers Time Interval 16-30</th>
-      <th>All Number Of Passengers Time Interval 31-45</th>
-      <th>All Number Of Passengers Time Interval 46-60</th>
-      <th>All Number Of Passengers Time Interval 61-90</th>
-      <th>All Number Of Passengers Time Interval 91-120</th>
-      <th>All Number Of Passengers Time Interval 120 plus</th>
-      <th>All Unnamed: 17_level_1 Excluded</th>
-      <th>All Unnamed: 18_level_1 Total</th>
-      <th>All Unnamed: 19_level_1 Flights</th>
-      <th>All Unnamed: 20_level_1 Booths</th>
-    </tr>
-    <tr>
-      <th>ts</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>0</td>
-      <td>11.240000</td>
-      <td>29.920000</td>
-      <td>17.040000</td>
-      <td>37.080000</td>
-      <td>14.480000</td>
-      <td>37.120000</td>
-      <td>112.480000</td>
-      <td>49.000000</td>
-      <td>11.520000</td>
-      <td>3.440000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>7.680000</td>
-      <td>184.120000</td>
-      <td>1.440000</td>
-      <td>6.480000</td>
-    </tr>
-    <tr>
-      <td>1</td>
-      <td>7.000000</td>
-      <td>29.000000</td>
-      <td>17.500000</td>
-      <td>37.000000</td>
-      <td>14.000000</td>
-      <td>37.000000</td>
-      <td>74.000000</td>
-      <td>33.000000</td>
-      <td>13.500000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>6.500000</td>
-      <td>127.000000</td>
-      <td>1.000000</td>
-      <td>4.500000</td>
-    </tr>
-    <tr>
-      <td>5</td>
-      <td>23.272727</td>
-      <td>49.727273</td>
-      <td>25.590909</td>
-      <td>65.000000</td>
-      <td>24.272727</td>
-      <td>65.136364</td>
-      <td>148.909091</td>
-      <td>127.227273</td>
-      <td>89.727273</td>
-      <td>39.954545</td>
-      <td>25.545455</td>
-      <td>4.727273</td>
-      <td>0.136364</td>
-      <td>17.636364</td>
-      <td>453.863636</td>
-      <td>1.863636</td>
-      <td>11.636364</td>
-    </tr>
-    <tr>
-      <td>6</td>
-      <td>18.807692</td>
-      <td>62.884615</td>
-      <td>33.576923</td>
-      <td>84.615385</td>
-      <td>27.230769</td>
-      <td>84.615385</td>
-      <td>303.076923</td>
-      <td>192.153846</td>
-      <td>101.884615</td>
-      <td>53.461538</td>
-      <td>49.884615</td>
-      <td>41.615385</td>
-      <td>5.000000</td>
-      <td>25.269231</td>
-      <td>772.346154</td>
-      <td>3.192308</td>
-      <td>15.269231</td>
-    </tr>
-    <tr>
-      <td>7</td>
-      <td>17.846154</td>
-      <td>55.961538</td>
-      <td>36.384615</td>
-      <td>89.500000</td>
-      <td>29.538462</td>
-      <td>89.615385</td>
-      <td>216.461538</td>
-      <td>128.038462</td>
-      <td>71.192308</td>
-      <td>39.461538</td>
-      <td>55.384615</td>
-      <td>15.307692</td>
-      <td>6.615385</td>
-      <td>17.423077</td>
-      <td>549.884615</td>
-      <td>2.538462</td>
-      <td>17.192308</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -13458,44 +13276,6 @@ div#notebook {
 <span class="p">}</span>
 
 <span class="n">nbi</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x_f</span><span class="p">,</span> <span class="n">y_f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span><span class="n">airport_code</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    
-
-
-
-  <div class="output_subarea output_widget_view ">
-    <button class="js-nbinteract-widget">
-      Loading widgets...
-    </button>
-  </div>
-
-</div>
-
-</div>
-</div>
-
-  </div>
-
-  
-
-  <div class="
-      cell border-box-sizing code_cell rendered">
-    <div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
 </pre></div>
 
     </div>
