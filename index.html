@@ -13114,7 +13114,11 @@ div#notebook {
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="US-Airport-Passport-Control-Wait-Times">US Airport Passport Control Wait Times<a class="anchor-link" href="#US-Airport-Passport-Control-Wait-Times">&#182;</a></h1><p>I made this to help determine a good time to fly in and out of US airports. The data comes from CBP and the specs can be found here.</p>
+<h1 id="US-Airport-Passport-Control-Wait-Times">US Airport Passport Control Wait Times<a class="anchor-link" href="#US-Airport-Passport-Control-Wait-Times">&#182;</a></h1><p>I made this to help determine a good time to fly in and out of US airports.</p>
+<ul>
+<li><a href="https://awt.cbp.gov">Data Source</a></li>
+<li><a href="https://awt.cbp.gov/Specs.html">Specs</a></li>
+</ul>
 
 </div>
 </div>
@@ -13154,33 +13158,32 @@ div#notebook {
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">get_airport_info</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
-    <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
-    <span class="n">first</span> <span class="o">=</span> <span class="n">today</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">lastMonthLastDay</span> <span class="o">=</span> <span class="n">first</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">toDate</span> <span class="o">=</span> <span class="n">lastMonthLastDay</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y&#39;</span><span class="p">)</span>
-    <span class="n">lastMonthFirstDay</span> <span class="o">=</span> <span class="n">lastMonthLastDay</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">fromDate</span> <span class="o">=</span> <span class="n">lastMonthFirstDay</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y&#39;</span><span class="p">)</span>
-    
+<span class="k">def</span> <span class="nf">get_airport_info</span><span class="p">(</span><span class="n">airport_code</span><span class="p">,</span> <span class="n">fromDate</span><span class="p">,</span> <span class="n">toDate</span><span class="p">):</span>
+
+    <span class="c1"># get data from CPB website</span>
     <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://awt.cbp.gov&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">code</span><span class="p">,</span>
+        <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">airport_code</span><span class="p">,</span>
         <span class="s2">&quot;rptFrom&quot;</span><span class="p">:</span> <span class="n">fromDate</span><span class="p">,</span>
         <span class="s2">&quot;rptTo&quot;</span><span class="p">:</span> <span class="n">toDate</span>
     <span class="p">}</span>
-
     <span class="n">res</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># parse html for table and load into a pandas dataframe</span>
     <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
     <span class="n">table</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> 
     <span class="n">dfs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_html</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">))</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">dfs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># flatten column names from tuples to strings</span>
     <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">col</span><span class="p">)))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
-    <span class="c1"># most of our analysis will be around day of</span>
-    
-    <span class="c1"># convert date and hour to a time datatype</span>
+
+    <span class="c1"># create a time series index field</span>
     <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;--&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">d</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;--&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;--&#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Hour&#39;</span><span class="p">]]</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%m/</span><span class="si">%d</span><span class="s2">/%Y %H&quot;</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;ts&#39;</span><span class="p">)</span>
+
+    <span class="c1"># aggregate data by hour of day</span>
     <span class="n">df_hour_of_day_mean</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">df_hour_of_day_mean</span>
 </pre></div>
@@ -13199,8 +13202,34 @@ div#notebook {
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">get_airport_info</span><span class="p">(</span><span class="s1">&#39;SFO&#39;</span><span class="p">)</span>
-<span class="n">df</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_last_months_from_to_dates</span><span class="p">():</span>
+    <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">today</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">lastMonthLastDay</span> <span class="o">=</span> <span class="n">first</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">toDate</span> <span class="o">=</span> <span class="n">lastMonthLastDay</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y&#39;</span><span class="p">)</span>
+    <span class="n">lastMonthFirstDay</span> <span class="o">=</span> <span class="n">lastMonthLastDay</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fromDate</span> <span class="o">=</span> <span class="n">lastMonthFirstDay</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">fromDate</span><span class="p">,</span> <span class="n">toDate</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+  </div>
+
+  
+
+  <div class="
+      cell border-box-sizing code_cell rendered">
+    <div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># sample data and to get shape of arrays</span>
+<span class="p">(</span><span class="n">fromDate</span><span class="p">,</span> <span class="n">toDate</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_last_months_from_to_dates</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">get_airport_info</span><span class="p">(</span><span class="s1">&#39;SFO&#39;</span><span class="p">,</span> <span class="n">fromDate</span><span class="p">,</span> <span class="n">toDate</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -13375,326 +13404,6 @@ div#notebook {
       <td>2.538462</td>
       <td>17.192308</td>
     </tr>
-    <tr>
-      <td>8</td>
-      <td>15.942857</td>
-      <td>42.085714</td>
-      <td>27.400000</td>
-      <td>61.485714</td>
-      <td>22.542857</td>
-      <td>61.514286</td>
-      <td>304.171429</td>
-      <td>172.800000</td>
-      <td>76.600000</td>
-      <td>30.828571</td>
-      <td>14.085714</td>
-      <td>6.657143</td>
-      <td>3.285714</td>
-      <td>18.942857</td>
-      <td>627.371429</td>
-      <td>3.085714</td>
-      <td>18.742857</td>
-    </tr>
-    <tr>
-      <td>9</td>
-      <td>12.773585</td>
-      <td>41.226415</td>
-      <td>24.396226</td>
-      <td>54.075472</td>
-      <td>20.075472</td>
-      <td>54.094340</td>
-      <td>224.132075</td>
-      <td>139.358491</td>
-      <td>56.169811</td>
-      <td>13.773585</td>
-      <td>11.358491</td>
-      <td>2.754717</td>
-      <td>1.452830</td>
-      <td>14.339623</td>
-      <td>463.339623</td>
-      <td>2.226415</td>
-      <td>18.849057</td>
-    </tr>
-    <tr>
-      <td>10</td>
-      <td>12.611111</td>
-      <td>40.648148</td>
-      <td>23.759259</td>
-      <td>56.629630</td>
-      <td>19.462963</td>
-      <td>56.629630</td>
-      <td>256.425926</td>
-      <td>144.981481</td>
-      <td>57.444444</td>
-      <td>21.518519</td>
-      <td>21.240741</td>
-      <td>3.685185</td>
-      <td>1.574074</td>
-      <td>15.037037</td>
-      <td>521.907407</td>
-      <td>2.500000</td>
-      <td>18.574074</td>
-    </tr>
-    <tr>
-      <td>11</td>
-      <td>12.603774</td>
-      <td>52.245283</td>
-      <td>32.113208</td>
-      <td>68.132075</td>
-      <td>25.547170</td>
-      <td>68.132075</td>
-      <td>274.075472</td>
-      <td>149.811321</td>
-      <td>83.830189</td>
-      <td>64.113208</td>
-      <td>74.000000</td>
-      <td>17.320755</td>
-      <td>0.320755</td>
-      <td>19.660377</td>
-      <td>683.132075</td>
-      <td>2.792453</td>
-      <td>18.924528</td>
-    </tr>
-    <tr>
-      <td>12</td>
-      <td>13.456522</td>
-      <td>51.195652</td>
-      <td>33.565217</td>
-      <td>71.434783</td>
-      <td>26.260870</td>
-      <td>71.434783</td>
-      <td>265.543478</td>
-      <td>185.782609</td>
-      <td>88.478261</td>
-      <td>57.260870</td>
-      <td>68.782609</td>
-      <td>10.391304</td>
-      <td>0.413043</td>
-      <td>19.521739</td>
-      <td>696.173913</td>
-      <td>2.217391</td>
-      <td>21.173913</td>
-    </tr>
-    <tr>
-      <td>13</td>
-      <td>13.020408</td>
-      <td>46.918367</td>
-      <td>33.020408</td>
-      <td>71.000000</td>
-      <td>25.714286</td>
-      <td>71.000000</td>
-      <td>262.224490</td>
-      <td>185.591837</td>
-      <td>79.775510</td>
-      <td>51.795918</td>
-      <td>56.081633</td>
-      <td>18.285714</td>
-      <td>5.102041</td>
-      <td>18.734694</td>
-      <td>677.591837</td>
-      <td>2.306122</td>
-      <td>21.816327</td>
-    </tr>
-    <tr>
-      <td>14</td>
-      <td>13.629630</td>
-      <td>62.962963</td>
-      <td>36.481481</td>
-      <td>82.592593</td>
-      <td>28.240741</td>
-      <td>82.592593</td>
-      <td>395.037037</td>
-      <td>224.370370</td>
-      <td>120.074074</td>
-      <td>87.462963</td>
-      <td>135.185185</td>
-      <td>32.555556</td>
-      <td>4.870370</td>
-      <td>30.740741</td>
-      <td>1030.296296</td>
-      <td>3.814815</td>
-      <td>22.407407</td>
-    </tr>
-    <tr>
-      <td>15</td>
-      <td>13.019231</td>
-      <td>47.576923</td>
-      <td>33.788462</td>
-      <td>71.403846</td>
-      <td>25.096154</td>
-      <td>71.557692</td>
-      <td>281.769231</td>
-      <td>172.173077</td>
-      <td>74.442308</td>
-      <td>40.807692</td>
-      <td>37.461538</td>
-      <td>11.596154</td>
-      <td>1.846154</td>
-      <td>19.326923</td>
-      <td>639.423077</td>
-      <td>3.038462</td>
-      <td>21.173077</td>
-    </tr>
-    <tr>
-      <td>16</td>
-      <td>13.314815</td>
-      <td>51.185185</td>
-      <td>32.092593</td>
-      <td>70.703704</td>
-      <td>22.814815</td>
-      <td>70.740741</td>
-      <td>427.425926</td>
-      <td>235.259259</td>
-      <td>95.037037</td>
-      <td>59.314815</td>
-      <td>72.000000</td>
-      <td>10.907407</td>
-      <td>0.648148</td>
-      <td>27.574074</td>
-      <td>928.166667</td>
-      <td>3.962963</td>
-      <td>21.500000</td>
-    </tr>
-    <tr>
-      <td>17</td>
-      <td>12.760870</td>
-      <td>37.826087</td>
-      <td>29.282609</td>
-      <td>57.391304</td>
-      <td>22.586957</td>
-      <td>57.391304</td>
-      <td>231.239130</td>
-      <td>148.804348</td>
-      <td>61.434783</td>
-      <td>33.978261</td>
-      <td>34.391304</td>
-      <td>7.826087</td>
-      <td>6.086957</td>
-      <td>14.326087</td>
-      <td>538.086957</td>
-      <td>2.130435</td>
-      <td>18.108696</td>
-    </tr>
-    <tr>
-      <td>18</td>
-      <td>12.767442</td>
-      <td>40.255814</td>
-      <td>26.232558</td>
-      <td>54.046512</td>
-      <td>19.906977</td>
-      <td>54.093023</td>
-      <td>262.023256</td>
-      <td>163.837209</td>
-      <td>58.395349</td>
-      <td>23.720930</td>
-      <td>24.093023</td>
-      <td>3.837209</td>
-      <td>1.930233</td>
-      <td>16.697674</td>
-      <td>554.534884</td>
-      <td>1.976744</td>
-      <td>16.116279</td>
-    </tr>
-    <tr>
-      <td>19</td>
-      <td>13.703704</td>
-      <td>45.333333</td>
-      <td>24.055556</td>
-      <td>54.240741</td>
-      <td>18.444444</td>
-      <td>54.296296</td>
-      <td>295.685185</td>
-      <td>166.796296</td>
-      <td>56.907407</td>
-      <td>23.851852</td>
-      <td>18.444444</td>
-      <td>5.500000</td>
-      <td>0.259259</td>
-      <td>18.388889</td>
-      <td>585.833333</td>
-      <td>2.666667</td>
-      <td>16.851852</td>
-    </tr>
-    <tr>
-      <td>20</td>
-      <td>12.923077</td>
-      <td>47.519231</td>
-      <td>27.000000</td>
-      <td>60.576923</td>
-      <td>20.442308</td>
-      <td>60.596154</td>
-      <td>326.980769</td>
-      <td>175.557692</td>
-      <td>61.538462</td>
-      <td>37.519231</td>
-      <td>25.673077</td>
-      <td>4.250000</td>
-      <td>0.423077</td>
-      <td>20.653846</td>
-      <td>652.596154</td>
-      <td>2.807692</td>
-      <td>16.538462</td>
-    </tr>
-    <tr>
-      <td>21</td>
-      <td>10.630435</td>
-      <td>31.195652</td>
-      <td>21.260870</td>
-      <td>45.086957</td>
-      <td>16.347826</td>
-      <td>45.086957</td>
-      <td>160.173913</td>
-      <td>75.630435</td>
-      <td>31.326087</td>
-      <td>14.456522</td>
-      <td>8.934783</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>10.956522</td>
-      <td>301.478261</td>
-      <td>1.521739</td>
-      <td>12.652174</td>
-    </tr>
-    <tr>
-      <td>22</td>
-      <td>6.000000</td>
-      <td>23.958333</td>
-      <td>13.958333</td>
-      <td>31.458333</td>
-      <td>9.750000</td>
-      <td>31.458333</td>
-      <td>170.833333</td>
-      <td>34.000000</td>
-      <td>10.750000</td>
-      <td>2.291667</td>
-      <td>1.166667</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>10.791667</td>
-      <td>229.833333</td>
-      <td>1.458333</td>
-      <td>8.458333</td>
-    </tr>
-    <tr>
-      <td>23</td>
-      <td>8.055556</td>
-      <td>22.888889</td>
-      <td>12.888889</td>
-      <td>29.277778</td>
-      <td>10.833333</td>
-      <td>29.722222</td>
-      <td>93.111111</td>
-      <td>28.333333</td>
-      <td>4.944444</td>
-      <td>0.388889</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>6.388889</td>
-      <td>133.166667</td>
-      <td>1.055556</td>
-      <td>5.944444</td>
-    </tr>
   </tbody>
 </table>
 </div>
@@ -13715,119 +13424,11 @@ div#notebook {
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[&#39;U.S. Citizen Average Wait  Time&#39;,
- &#39;U.S. Citizen Max Wait  Time&#39;,
- &#39;Non U.S. Citizen Average Wait  Time&#39;,
- &#39;Non U.S. Citizen Max Wait  Time&#39;,
- &#39;All Wait Times Average Wait  Time&#39;,
- &#39;All Wait Times Max Wait  Time&#39;,
- &#39;All Number Of Passengers Time Interval 0-15&#39;,
- &#39;All Number Of Passengers Time Interval 16-30&#39;,
- &#39;All Number Of Passengers Time Interval 31-45&#39;,
- &#39;All Number Of Passengers Time Interval 46-60&#39;,
- &#39;All Number Of Passengers Time Interval 61-90&#39;,
- &#39;All Number Of Passengers Time Interval 91-120&#39;,
- &#39;All Number Of Passengers Time Interval 120 plus&#39;,
- &#39;All Unnamed: 17_level_1 Excluded&#39;,
- &#39;All Unnamed: 18_level_1 Total&#39;,
- &#39;All Unnamed: 19_level_1 Flights&#39;,
- &#39;All Unnamed: 20_level_1 Booths&#39;]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-  </div>
-
-  
-
-  <div class="
-      cell border-box-sizing code_cell rendered">
-    <div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">codes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GUM&quot;</span><span class="p">,</span> <span class="s2">&quot;ATL&quot;</span><span class="p">,</span> <span class="s2">&quot;AUS&quot;</span><span class="p">,</span> <span class="s2">&quot;BWI&quot;</span><span class="p">,</span> <span class="s2">&quot;BOS&quot;</span><span class="p">,</span> <span class="s2">&quot;CLT&quot;</span><span class="p">,</span> <span class="s2">&quot;MDW&quot;</span><span class="p">,</span> <span class="s2">&quot;ORD&quot;</span><span class="p">,</span> <span class="s2">&quot;CVG&quot;</span><span class="p">,</span> <span class="s2">&quot;DFW&quot;</span><span class="p">,</span> <span class="s2">&quot;DEN&quot;</span><span class="p">,</span> <span class="s2">&quot;DTW&quot;</span><span class="p">,</span> <span class="s2">&quot;FLL&quot;</span><span class="p">,</span> <span class="s2">&quot;FAT&quot;</span><span class="p">,</span> <span class="s2">&quot;HNL&quot;</span><span class="p">,</span> <span class="s2">&quot;IAH&quot;</span><span class="p">,</span> <span class="s2">&quot;SNA&quot;</span><span class="p">,</span> <span class="s2">&quot;ONT&quot;</span><span class="p">,</span> <span class="s2">&quot;STL&quot;</span><span class="p">,</span> <span class="s2">&quot;LAX&quot;</span><span class="p">,</span> <span class="s2">&quot;SJU&quot;</span><span class="p">,</span> <span class="s2">&quot;LAS&quot;</span><span class="p">,</span> <span class="s2">&quot;OAK&quot;</span><span class="p">,</span> <span class="s2">&quot;MIA&quot;</span><span class="p">,</span> <span class="s2">&quot;MSP&quot;</span><span class="p">,</span> <span class="s2">&quot;JFK&quot;</span><span class="p">,</span> <span class="s2">&quot;EWR&quot;</span><span class="p">,</span> <span class="s2">&quot;SJC&quot;</span><span class="p">,</span> <span class="s2">&quot;MCO&quot;</span><span class="p">,</span> <span class="s2">&quot;SFB&quot;</span><span class="p">,</span> <span class="s2">&quot;PBI&quot;</span><span class="p">,</span> <span class="s2">&quot;PHL&quot;</span><span class="p">,</span> <span class="s2">&quot;PHX&quot;</span><span class="p">,</span> <span class="s2">&quot;PDX&quot;</span><span class="p">,</span> <span class="s2">&quot;RDU&quot;</span><span class="p">,</span> <span class="s2">&quot;SMF&quot;</span><span class="p">,</span> <span class="s2">&quot;SPN&quot;</span><span class="p">,</span> <span class="s2">&quot;SLC&quot;</span><span class="p">,</span> <span class="s2">&quot;SAT&quot;</span><span class="p">,</span> <span class="s2">&quot;SAN&quot;</span><span class="p">,</span> <span class="s2">&quot;SFO&quot;</span><span class="p">,</span> <span class="s2">&quot;SEA&quot;</span><span class="p">,</span> <span class="s2">&quot;TPA&quot;</span><span class="p">,</span> <span class="s2">&quot;IAD&quot;</span><span class="p">]</span>
-<span class="n">attrs</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="n">attrs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 </pre></div>
 
     </div>
-</div>
-</div>
-
-  </div>
-
-  
-
-  <div class="
-      cell border-box-sizing code_cell rendered">
-    <div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;U.S. Citizen Max Wait  Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>{0: 29.92,
- 1: 29.0,
- 5: 49.72727272727273,
- 6: 62.88461538461539,
- 7: 55.96153846153846,
- 8: 42.08571428571429,
- 9: 41.22641509433962,
- 10: 40.648148148148145,
- 11: 52.24528301886792,
- 12: 51.19565217391305,
- 13: 46.91836734693877,
- 14: 62.96296296296296,
- 15: 47.57692307692308,
- 16: 51.18518518518518,
- 17: 37.82608695652174,
- 18: 40.25581395348837,
- 19: 45.333333333333336,
- 20: 47.51923076923077,
- 21: 31.195652173913043,
- 22: 23.958333333333332,
- 23: 22.88888888888889}</pre>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -13842,7 +13443,8 @@ div#notebook {
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">y_f</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">airport_code</span><span class="p">,</span> <span class="n">statistic</span><span class="p">):</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">get_airport_info</span><span class="p">(</span><span class="n">airport_code</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">fromDate</span><span class="p">,</span> <span class="n">toDate</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_last_months_from_to_dates</span><span class="p">()</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">get_airport_info</span><span class="p">(</span><span class="n">airport_code</span><span class="p">,</span> <span class="n">fromDate</span><span class="p">,</span> <span class="n">toDate</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">statistic</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
     <span class="n">squarer</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">h</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="k">if</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">d</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="n">vfunc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">squarer</span><span class="p">)</span>
@@ -13852,7 +13454,6 @@ div#notebook {
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
 
 <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;xlim&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">),</span>
     <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;x: Hour of day, y: Mean value for last month&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -13866,16 +13467,6 @@ div#notebook {
 <div class="output_wrapper">
 <div class="output">
 
-
-<div class="output_area">
-
-    
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>WARNING:root:The following options are not supported by this function and will likely result in undefined behavior: [&#39;xlim&#39;].
-</pre>
-</div>
-</div>
 
 <div class="output_area">
 
