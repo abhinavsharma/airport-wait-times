@@ -2,6 +2,9 @@
 
 This makes the data from [CBP](https://awt.cbp.gov) a little easier to digest so you can decide what time to fly into a US aiport.
 
+![screenshot](https://github.com/abhinavsharma/airport-wait-times/raw/master/screenshot.png "screenshot")
+
+
 ### [Use it](https://abhinavsharma.github.io/airport-wait-times)
 
 - Open the page above and click "Show widgets". It helps to have your JS console open because Binder dumps the status of the virtual machine loading up there.
