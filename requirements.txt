@@ -5,7 +5,7 @@ beautifulsoup4==4.8.1
 bleach==3.1.0
 bqplot==0.11.8
 bs4==0.0.1
-certifi==2019.9.11
+certifi==2022.12.7
 chardet==3.0.4
 cycler==0.10.0
 decorator==4.4.0
